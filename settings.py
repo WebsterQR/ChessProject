@@ -18,6 +18,10 @@ DARK_CELL = (139, 69, 19)
 LIGHT_CELL = (244, 164, 96)
 DARK_RED = (128, 0, 0)
 
+FONT_PATH = "fonts/Arial/arial_bolditalicmt.ttf"
+FONT_SIZE = 18
+LETTERS = 'abcdefghigklmnopqrstuvwxyz'.upper()
+
 chessboard = [[False for i in range(8)] for j in range(8)]
 
 figures = {

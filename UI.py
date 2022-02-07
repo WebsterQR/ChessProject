@@ -10,55 +10,57 @@ def draw_text(screen, text, size, x, y):
     text_rect.midtop = (x, y)
     screen.blit(text_surface, text_rect)
 
-def draw_desk(screen):
 
-    size = settings.cell_size
-    font = pygame.font.Font("fonts/Arial/arial_bolditalicmt.ttf", 18)
-    letters = 'abcdefghigklmnopqrstuvwxyz'.upper()
+class Chessboard():
+    def __init__(self, screen):
+        self.screen = screen
+        self.draw_desk(self.screen)
 
-    num_lines = pygame.Surface((size * 8, size // 2))
-    num_rows = pygame.Surface((size // 2, size * 8))
-    cells = pygame.Surface((size * 8, size * 8))
-    board = pygame.Surface((
-        2 * num_rows.get_width() + cells.get_width(),
-        2 * num_lines.get_height() + cells.get_height()
-    ))
+    def draw_desk(self, screen):
+        font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE)
 
-    board.fill(settings.DARK_RED)
-    num_rows.fill(settings.DARK_RED)
-    num_lines.fill(settings.DARK_RED)
-
-
-    for i in range(8):
-        for j in range(8):
-            if (i + j) % 2 == 0:
-                color = settings.LIGHT_CELL
-            else:
-                color = settings.DARK_CELL
-            cell = pygame.Surface((size, size))
-            cell.fill(color)
-            cells.blit(cell, (i * size, j * size))
-
-    for i in range(8):
-        letter = font.render(letters[i], 1, settings.WHITE)
-        number = font.render(str(i + 1), 1, settings.WHITE)
-        num_rows.blit(letter, (
-            (num_rows.get_width() - letter.get_rect().width) // 2,
-            i * size + (size - letter.get_rect().height) // 2
-        ))
-        num_lines.blit(number, (
-            i * size + (size - number.get_rect().width) // 2,
-            (num_lines.get_height() - letter.get_rect().height) // 2
+        num_lines = pygame.Surface((settings.cell_size * 8, settings.cell_size // 2))
+        num_rows = pygame.Surface((settings.cell_size // 2, settings.cell_size * 8))
+        cells = pygame.Surface((settings.cell_size * 8, settings.cell_size * 8))
+        board = pygame.Surface((
+            2 * num_rows.get_width() + cells.get_width(),
+            2 * num_lines.get_height() + cells.get_height()
         ))
 
-    board.blit(num_lines, (num_rows.get_width(), 0))
-    board.blit(num_lines, (num_rows.get_width(), num_lines.get_height() + cells.get_height()))
-    board.blit(num_rows, (0, num_lines.get_height()))
-    board.blit(num_rows, (num_rows.get_width() + cells.get_width(), num_lines.get_height()))
-    board.blit(cells, (num_rows.get_width(), num_lines.get_height()))
-    screen.blit(board, (10, 10))
+        board.fill(settings.DARK_RED)
+        num_rows.fill(settings.DARK_RED)
+        num_lines.fill(settings.DARK_RED)
 
-    pygame.display.update()
+        for i in range(8):
+            for j in range(8):
+                if (i + j) % 2 == 0:
+                    color = settings.LIGHT_CELL
+                else:
+                    color = settings.DARK_CELL
+                cell = pygame.Surface((settings.cell_size, settings.cell_size))
+                cell.fill(color)
+                cells.blit(cell, (i * settings.cell_size, j * settings.cell_size))
+
+        for i in range(8):
+            letter = font.render(settings.LETTERS[i], 1, settings.WHITE)
+            number = font.render(str(i + 1), 1, settings.WHITE)
+            num_rows.blit(letter, (
+                (num_rows.get_width() - letter.get_rect().width) // 2,
+                i * settings.cell_size + (settings.cell_size - letter.get_rect().height) // 2
+            ))
+            num_lines.blit(number, (
+                i * settings.cell_size + (settings.cell_size - number.get_rect().width) // 2,
+                (num_lines.get_height() - letter.get_rect().height) // 2
+            ))
+
+        board.blit(num_lines, (num_rows.get_width(), 0))
+        board.blit(num_lines, (num_rows.get_width(), num_lines.get_height() + cells.get_height()))
+        board.blit(num_rows, (0, num_lines.get_height()))
+        board.blit(num_rows, (num_rows.get_width() + cells.get_width(), num_lines.get_height()))
+        board.blit(cells, (num_rows.get_width(), num_lines.get_height()))
+        screen.blit(board, (settings.screen_width // 2 - board.get_width() // 2, 10))
+
+        pygame.display.update()
 
 
 def put_figures(screen, white_figures, black_figures):

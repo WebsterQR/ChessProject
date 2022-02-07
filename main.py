@@ -17,12 +17,11 @@ def main():
 
     clock = pygame.time.Clock()
 
-    chessboard = settings.chessboard
-    white_figures = settings.figures
-    black_figures = settings.figures
 
+    chessboard = UI.Chessboard(screen)
 
-    UI.draw_desk(screen)
+    #UI.draw_desk(screen)
+
     #UI.put_figures(screen, white_figures, black_figures)
 
 
