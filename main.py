@@ -11,14 +11,19 @@ def main():
     pygame.display.set_caption('Chess game')
     #pygame.display.set_mode((settings.screen_width, settings.screen_width), pygame.RESIZABLE)
     screen = pygame.display.set_mode((settings.screen_width, settings.screen_width), pygame.RESIZABLE)
-    screen.fill(settings.LIGHT_BLUE)
+    screen.fill(settings.WHITE)
 
     pygame.display.update()
 
     clock = pygame.time.Clock()
 
+    chessboard = settings.chessboard
+    white_figures = settings.figures
+    black_figures = settings.figures
+
 
     UI.draw_desk(screen)
+    #UI.put_figures(screen, white_figures, black_figures)
 
 
     while True:
@@ -26,9 +31,10 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-        #clock.tick(settings.FPS)
 
-        #pygame.display.update()
+        mouse = pygame.mouse.get_pressed()
+        if mouse[0]:
+            print(pygame.mouse.get_pos())
 
 
 if __name__ == "__main__":
