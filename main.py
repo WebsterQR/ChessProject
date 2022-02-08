@@ -30,10 +30,11 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-
-        mouse = pygame.mouse.get_pressed()
-        if mouse[0]:
-            print(pygame.mouse.get_pos())
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                chessboard.button_down(event.button, event.pos)
+                print(event.button, event.pos)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                chessboard.button_up(event.button, event.pos)
 
 
 if __name__ == "__main__":

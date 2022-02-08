@@ -3,6 +3,7 @@ import settings
 
 font_name = pygame.font.match_font('arial')
 
+
 def draw_text(screen, text, size, x, y):
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, settings.RED)
@@ -11,10 +12,20 @@ def draw_text(screen, text, size, x, y):
     screen.blit(text_surface, text_rect)
 
 
+colors = ["dark_cell.jpeg", "light_cell.jpeg", "border.jpeg"]
+
+
 class Chessboard():
     def __init__(self, screen):
         self.screen = screen
+        self.cells_group = pygame.sprite.Group()
+        self.figures_group = pygame.sprite.Group()
+        self.board_size = (0, 0)
         self.draw_desk(self.screen)
+        self.draw_figures(self.screen)
+        self.hasFigure = False
+        self.takenFigureName = None
+        self.matrix_board = [[0 for _ in range(8)]for _ in range(8)]
 
     def draw_desk(self, screen):
         font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE)
@@ -26,7 +37,7 @@ class Chessboard():
             2 * num_rows.get_width() + cells.get_width(),
             2 * num_lines.get_height() + cells.get_height()
         ))
-
+        self.board_size = board.get_size()
         board.fill(settings.DARK_RED)
         num_rows.fill(settings.DARK_RED)
         num_lines.fill(settings.DARK_RED)
@@ -34,21 +45,20 @@ class Chessboard():
         for i in range(8):
             for j in range(8):
                 if (i + j) % 2 == 0:
-                    color = settings.LIGHT_CELL
+                    color_index = 0
                 else:
-                    color = settings.DARK_CELL
-                cell = pygame.Surface((settings.cell_size, settings.cell_size))
-                cell.fill(color)
-                cells.blit(cell, (i * settings.cell_size, j * settings.cell_size))
+                    color_index = 1
+                cell = Cell(color_index, settings.cell_size, (i, j), settings.LETTERS[i] + str(j + 1))
+                self.cells_group.add(cell)
 
         for i in range(8):
             letter = font.render(settings.LETTERS[i], 1, settings.WHITE)
             number = font.render(str(i + 1), 1, settings.WHITE)
-            num_rows.blit(letter, (
+            num_rows.blit(number, (
                 (num_rows.get_width() - letter.get_rect().width) // 2,
                 i * settings.cell_size + (settings.cell_size - letter.get_rect().height) // 2
             ))
-            num_lines.blit(number, (
+            num_lines.blit(letter, (
                 i * settings.cell_size + (settings.cell_size - number.get_rect().width) // 2,
                 (num_lines.get_height() - letter.get_rect().height) // 2
             ))
@@ -57,10 +67,91 @@ class Chessboard():
         board.blit(num_lines, (num_rows.get_width(), num_lines.get_height() + cells.get_height()))
         board.blit(num_rows, (0, num_lines.get_height()))
         board.blit(num_rows, (num_rows.get_width() + cells.get_width(), num_lines.get_height()))
-        board.blit(cells, (num_rows.get_width(), num_lines.get_height()))
         screen.blit(board, (settings.screen_width // 2 - board.get_width() // 2, 10))
+        for one_cell in self.cells_group:
+            one_cell.rect.x += ((settings.screen_width // 2 - board.get_width() // 2) + num_rows.get_width())
+            one_cell.rect.y += (num_lines.get_height() + 10)
+        self.cells_group.draw(self.screen)
 
         pygame.display.update()
+
+    def draw_figures(self, screen):
+        names = ['queen', 'king', 'bishop', 'pawn', 'rock', 'horse']
+        place = pygame.Surface((settings.cell_size * 8, settings.cell_size))
+        place.fill(settings.WHITE)
+        x_start = settings.screen_width // 2 - place.get_width() // 2
+        y_start = self.board_size[1] + 70
+        cells_poses = []
+        for i in range(6):
+            place_cell = placeCell(2, (x_start, y_start), place.get_width() / 6, (i, 0), names[i])
+            cells_poses.append(place_cell.rect)
+            self.figures_group.add(place_cell)
+        self.figures_group.draw(screen)
+        for num, figure_name in enumerate(names):
+            image = pygame.image.load(settings.IMG_PATH + figure_name + ".png").convert_alpha()
+            # image = pygame.transform.scale(image, (cells_poses[num][2]- 10, cells_poses[num][3] - 10))
+            fig_x = cells_poses[num][0] + cells_poses[num][2] // 2 - image.get_width() // 2
+            fig_y = cells_poses[num][1] + cells_poses[num][3] // 2 - image.get_height()
+            screen.blit(image, (fig_x, fig_y))
+        # queen = pygame.image.load("images/queen.png")
+        # screen.blit(queen, (cells_poses[0][0], cells_poses[0][1]))
+        pygame.display.update()
+
+    def get_cell(self, position: tuple):
+        for cell in self.cells_group:
+            if cell.rect.collidepoint(position):
+                return (cell, "board")
+        for cell in self.figures_group:
+            print(cell.rect, position)
+            if cell.rect.collidepoint(position):
+                return (cell, "figure")
+        return None
+
+    def button_down(self, button_type: int, position: tuple):
+        cell = self.get_cell(position)
+        if cell[0]:
+            if cell[1] == "figure" and not self.hasFigure:
+                print("Захват фигуры", cell[0].field_name)
+                self.hasFigure = True
+                self.takenFigureName = cell[0].field_name
+            elif cell[1] == "board" and self.hasFigure:
+                print(f"Ставим фигуру {self.takenFigureName} на клетку", cell[0].field_name)
+                coords_x, coords_y = get_matrix_indexes(cell[0].field_name)
+                self.matrix_board[coords_x][coords_y] = 1
+                self.hasFigure = False
+                self.takenFigureName = None
+
+    def button_up(self, button_type: int, position: tuple):
+        cell = self.get_cell(position)
+        print(self.matrix_board)
+
+def get_matrix_indexes(cell_name):
+    letter = cell_name[0]
+    number = cell_name[1]
+    return (settings.letter_to_num[letter], int(number) - 1)
+
+
+class Cell(pygame.sprite.Sprite):
+    def __init__(self, color_index: int, size: int, coords: tuple, name: str):
+        # self.colors = ["dark_cell.jpeg", "light_cell.jpeg"]
+        super().__init__()
+        x, y = coords
+        self.color = color_index
+        self.field_name = name
+        self.image = pygame.image.load(settings.IMG_PATH + colors[color_index])
+        self.image = pygame.transform.scale(self.image, (settings.cell_size, settings.cell_size))
+        self.rect = pygame.Rect(x * settings.cell_size, y * settings.cell_size, settings.cell_size, settings.cell_size)
+
+
+class placeCell(pygame.sprite.Sprite):
+    def __init__(self, color_index: int, start_pos: tuple, cell_size: int, coords: int, name: str):
+        super().__init__()
+        self.color = color_index
+        self.field_name = name
+        x, y = coords[0], coords[1]
+        self.image = pygame.image.load(settings.IMG_PATH + colors[color_index])
+        self.image = pygame.transform.scale(self.image, (settings.cell_size, settings.cell_size))
+        self.rect = pygame.Rect(start_pos[0] + x * cell_size, start_pos[1] + y * cell_size, cell_size, cell_size)
 
 
 def put_figures(screen, white_figures, black_figures):

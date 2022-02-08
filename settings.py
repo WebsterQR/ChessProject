@@ -22,6 +22,8 @@ FONT_PATH = "fonts/Arial/arial_bolditalicmt.ttf"
 FONT_SIZE = 18
 LETTERS = 'abcdefghigklmnopqrstuvwxyz'.upper()
 
+IMG_PATH = "images/"
+
 chessboard = [[False for i in range(8)] for j in range(8)]
 
 figures = {
@@ -31,4 +33,15 @@ figures = {
     'rock': 2,
     'queen': 1,
     'king': 1
+}
+
+letter_to_num = {
+    "A": 0,
+    "B": 1,
+    "C": 2,
+    "D": 3,
+    "E": 4,
+    "F": 5,
+    "G": 6,
+    "H": 7
 }
