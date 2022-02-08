@@ -31,8 +31,11 @@ class Chessboard():
         font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE)
 
         num_lines = pygame.Surface((settings.cell_size * 8, settings.cell_size // 2))
+
         num_rows = pygame.Surface((settings.cell_size // 2, settings.cell_size * 8))
+
         cells = pygame.Surface((settings.cell_size * 8, settings.cell_size * 8))
+
         board = pygame.Surface((
             2 * num_rows.get_width() + cells.get_width(),
             2 * num_lines.get_height() + cells.get_height()
@@ -72,7 +75,6 @@ class Chessboard():
             one_cell.rect.x += ((settings.screen_width // 2 - board.get_width() // 2) + num_rows.get_width())
             one_cell.rect.y += (num_lines.get_height() + 10)
         self.cells_group.draw(self.screen)
-
         pygame.display.update()
 
     def draw_figures(self, screen):
@@ -102,8 +104,9 @@ class Chessboard():
             if cell.rect.collidepoint(position):
                 return (cell, "board")
         for cell in self.figures_group:
-            print(cell.rect, position)
+            #print(cell.rect, position)
             if cell.rect.collidepoint(position):
+                print(cell.rect, cell.field_name)
                 return (cell, "figure")
         return None
 
@@ -111,11 +114,11 @@ class Chessboard():
         cell = self.get_cell(position)
         if cell[0]:
             if cell[1] == "figure" and not self.hasFigure:
-                print("Захват фигуры", cell[0].field_name)
+                #print("Захват фигуры", cell[0].field_name)
                 self.hasFigure = True
                 self.takenFigureName = cell[0].field_name
             elif cell[1] == "board" and self.hasFigure:
-                print(f"Ставим фигуру {self.takenFigureName} на клетку", cell[0].field_name)
+                #print(f"Ставим фигуру {self.takenFigureName} на клетку", cell[0].field_name)
                 coords_x, coords_y = get_matrix_indexes(cell[0].field_name)
                 self.matrix_board[coords_x][coords_y] = 1
                 self.hasFigure = False
@@ -123,7 +126,7 @@ class Chessboard():
 
     def button_up(self, button_type: int, position: tuple):
         cell = self.get_cell(position)
-        print(self.matrix_board)
+        #print(self.matrix_board)
 
 def get_matrix_indexes(cell_name):
     letter = cell_name[0]
@@ -133,7 +136,6 @@ def get_matrix_indexes(cell_name):
 
 class Cell(pygame.sprite.Sprite):
     def __init__(self, color_index: int, size: int, coords: tuple, name: str):
-        # self.colors = ["dark_cell.jpeg", "light_cell.jpeg"]
         super().__init__()
         x, y = coords
         self.color = color_index
