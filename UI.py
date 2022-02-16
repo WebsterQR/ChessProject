@@ -92,11 +92,10 @@ class Chessboard():
         for num, figure_name in enumerate(names):
             image = pygame.image.load(settings.IMG_PATH + figure_name + ".png").convert_alpha()
             # image = pygame.transform.scale(image, (cells_poses[num][2]- 10, cells_poses[num][3] - 10))
-            fig_x = cells_poses[num][0] + cells_poses[num][2] // 2 - image.get_width() // 2
-            fig_y = cells_poses[num][1] + cells_poses[num][3] // 2 - image.get_height()
+            image = pygame.transform.scale(image, (place_cell.rect.width * 0.5, place_cell.rect.height * 0.5))
+            fig_x = cells_poses[num][0] + cells_poses[num][2] // 2 - image.get_width() * 0.75
+            fig_y = cells_poses[num][1] + cells_poses[num][3] // 2 - image.get_height() * 0.75
             screen.blit(image, (fig_x, fig_y))
-        # queen = pygame.image.load("images/queen.png")
-        # screen.blit(queen, (cells_poses[0][0], cells_poses[0][1]))
         pygame.display.update()
 
     def get_cell(self, position: tuple):
@@ -104,9 +103,7 @@ class Chessboard():
             if cell.rect.collidepoint(position):
                 return (cell, "board")
         for cell in self.figures_group:
-            #print(cell.rect, position)
             if cell.rect.collidepoint(position):
-                print(cell.rect, cell.field_name)
                 return (cell, "figure")
         return None
 
@@ -114,19 +111,47 @@ class Chessboard():
         cell = self.get_cell(position)
         if cell[0]:
             if cell[1] == "figure" and not self.hasFigure:
-                #print("Захват фигуры", cell[0].field_name)
+                print("Захват фигуры", cell[0].field_name)
                 self.hasFigure = True
                 self.takenFigureName = cell[0].field_name
             elif cell[1] == "board" and self.hasFigure:
-                #print(f"Ставим фигуру {self.takenFigureName} на клетку", cell[0].field_name)
+                print(f"Ставим фигуру {self.takenFigureName} на клетку", cell[0].field_name)
+                self.put_figure_on_board(cell[0], self.takenFigureName)
                 coords_x, coords_y = get_matrix_indexes(cell[0].field_name)
-                self.matrix_board[coords_x][coords_y] = 1
+                #self.matrix_board[coords_x][coords_y] = 1
+                self.mark_matrix_after_move(self.takenFigureName, coords_x, coords_y)
                 self.hasFigure = False
                 self.takenFigureName = None
 
     def button_up(self, button_type: int, position: tuple):
         cell = self.get_cell(position)
-        #print(self.matrix_board)
+
+    def put_figure_on_board(self, cell, figure_name):
+        figure_image = pygame.image.load(settings.IMG_PATH + figure_name + ".png")
+        figure_image = pygame.transform.scale(figure_image, (cell.rect.width * 0.75, cell.rect.height * 0.75))
+        #figure_image.set_colorkey((255, 255, 255))
+        self.screen.blit(figure_image,
+                         (cell.rect.x + ((cell.rect.width - figure_image.get_width()) // 2),
+                          (cell.rect.y + (cell.rect.height - figure_image.get_height()) // 2)))
+        pygame.display.update()
+
+    def mark_matrix_after_move(self, fig_name, x, y):
+        self.matrix_board[x][y] = fig_name[0].upper()
+        if fig_name == "king":
+            for i in range(8):
+                for j in range(8):
+                    if abs(i - x) <= 1 and abs(j - y) <= 1 and self.matrix_board[i][j] == 0:
+                        self.matrix_board[i][j] = 1
+            for i in range(8):
+                print(*self.matrix_board[i])
+        if fig_name == "queen":
+            for i in range(8):
+                for j in range(8):
+                    if (i == x or j == y or abs(i - x) == abs(j - y)) and self.matrix_board[i][j] == 0:
+                        self.matrix_board[i][j] = 1
+            for i in range(8):
+                print(*self.matrix_board[i])
+
 
 def get_matrix_indexes(cell_name):
     letter = cell_name[0]
