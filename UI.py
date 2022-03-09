@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import settings
 
@@ -26,6 +28,8 @@ class Chessboard():
         self.hasFigure = False
         self.takenFigureName = None
         self.matrix_board = [[0 for _ in range(8)]for _ in range(8)]
+        self.player_move = True
+        self.PC_move = False
 
     def draw_desk(self, screen):
         font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE)
@@ -122,6 +126,8 @@ class Chessboard():
                 self.mark_matrix_after_move(self.takenFigureName, coords_x, coords_y)
                 self.hasFigure = False
                 self.takenFigureName = None
+                self.player_move = False
+                self.PC_move = True
 
     def button_up(self, button_type: int, position: tuple):
         cell = self.get_cell(position)
@@ -152,6 +158,10 @@ class Chessboard():
             for i in range(8):
                 print(*self.matrix_board[i])
 
+    def PC_move_action(self):
+        print(random.randint(1, 100))
+        self.player_move = True
+        self.PC_move = False
 
 def get_matrix_indexes(cell_name):
     letter = cell_name[0]

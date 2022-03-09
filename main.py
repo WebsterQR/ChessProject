@@ -27,6 +27,9 @@ def main():
 
     while True:
         for event in pygame.event.get():
+            if chessboard.PC_move:
+                chessboard.PC_move_action()
+
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
